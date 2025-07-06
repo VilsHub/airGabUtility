@@ -1,7 +1,3 @@
-Ensure to make the script ./src/downloadAndCompressImages.sh executable for all before initiating download on remote server to avoid the error below:
-
-Error: sudo: /tmp/airGapTempFiles/configs/downloadAndCompressImages.sh: command not found
-
 # Overview 
 The Airgab scripts helps in downloading images via a server that has access to the internet or private image registry, and imports the images to a server without access to the internet.
 
@@ -23,7 +19,7 @@ This script is used to download, docker images and chart Images. It would first 
 
 
 ## downloadPulledImages.sh
-This script is used to download images that has already been pulled and stored on the remote server. This is needed in case, of internet disconnection, where you would only need to specify the list of images that are needed, or down all if needed.
+This script is used to download images that has already been pulled and stored on the remote server. This is needed in the case of internet disconnection, where you would only need to specify the list of images that are needed, or download all if needed.
 
 ## extractAndImportImages.sh
 This script is used to extract and import the the downloaded image to **ctr** scope
@@ -33,7 +29,7 @@ This script is used to get the list of images for a Helm chart
 
 # Using scripts
 
-## How to dowload images
+## How to download images
 To download images, take the following steps:
 
  1. Make all the .sh files executalbe and make the scripts in the **./local_src/** directory executable for all users (**chmod a+x ./local_scr/*.sh**)
@@ -44,10 +40,8 @@ To download images, take the following steps:
    
  4. For docker image download you, would be asked to supply the name of the file which is expected to hold the list of images on each new line. But chart images, you would be asked the followings:
    
-      - The name of the helm release. Example zonedepenendecies
-      - The version number for helm chart. Example 1.0.202
       - The chart reference of the helm chart. Example zone/zone
-      - The values file for the chart if required
+      - The version number for helm chart. Example 1.0.202
 
  5. Once done, you may be asked for your SSH password multiple for task execution, but this depends on the remote server SSH configuration. On the last task, which would downloading of images to local server, you may choose to proceed on this stage or continue later using the **downloadPulledImages.sh** script
 
@@ -55,6 +49,9 @@ To download images, take the following steps:
 - If connectivity is broken, during the image pull process on the remote, the process will always resume from where it stopped on resumption 
 - All downloaded images are compressed in **.tar.gz** format
 - For chart images, the list of all the images would always be downloaded and stored in the directory **./imgTemp/[releaseName]_[version]_image_list.txt**. In a case where its fails to download due to connectivity, make use of the script **getChartImageList.sh** to get the image list.
+- Ensure to make the script ./remote_src/downloadAndCompressImages.sh executable for all before initiating download on remote server to avoid the error below:
+  
+  **Error: sudo: /tmp/airGapTempFiles/configs/downloadAndCompressImages.sh: command not found**
 
 ## How to import the downloaded images
 To import the downloaded images into the *ctr* scope, take the steps below:

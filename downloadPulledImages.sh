@@ -49,8 +49,9 @@ if [ $selectedOpt = "1" ]; then
 
 elif [ $selectedOpt = "2" ]; then
     # Download all pulled chart images
-    read -p "Enter the name of the helm release: " releaseName
+    read -p "Enter the chartReference, example (zone/zonedependency): " chartRef
     read -p "Enter the version number for helm chart: " version_no
+    releaseName=${chartRef//\//-}
 
     chartImageDir="$r_imageDir/$releaseName/$version_no"
 
@@ -74,8 +75,9 @@ elif [ $selectedOpt = "3" ]; then
     fi
 elif [ $selectedOpt = "4" ]; then
     # Specific pulled chart images
-    read -p "Enter the name of the helm release: " releaseName
+    read -p "Enter the chartReference, example (zone/zonedependency): " chartRef
     read -p "Enter the version number for helm chart: " version_no
+    releaseName=${chartRef//\//-}
     read -p "Has the $releaseName chart version $version_no been downloaded before, with the temp files stil on the remote server? y/n: " downloaded
 
     if [[ $downloaded = "y" && $downloaded = "Y" ]]; then

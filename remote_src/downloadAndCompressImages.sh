@@ -5,10 +5,9 @@ dir="/tmp/airGapTempFiles"
 configsDir="$dir/configs"
 imageDir="$dir/images"
 
-releaseName=$3
-chartReference=$4
-versionNumber=$1
-valueFile=$2
+releaseName=$1
+chartReference=$3
+versionNumber=$2
 
 trackDir="$dir/track"
 chartImageDir="$imageDir/$releaseName/$versionNumber"
@@ -25,11 +24,11 @@ if [ ! -d $trackDir ]; then
     chmod a+wr $trackDir
 fi
 
-# Example releaseName=zone, chartReference=zone/zone
+# Example releaseName=zone_dependendency, chartReference=zone/zone
 
 echo "Updating helm repo and installing zone..."
 helm repo update
-helm upgrade --install $releaseName $chartReference --version $versionNumber -f "$configsDir/$valueFile" --dry-run > "$dir/zone-values.txt" 
+helm template $releaseName $chartReference --version $versionNumber > "$dir/zone-values.txt" 
 
 # Set permissions
 chmod a+w "$dir/zone-values.txt"
