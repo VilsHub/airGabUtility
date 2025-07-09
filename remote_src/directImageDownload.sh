@@ -31,17 +31,20 @@ fi
 # Clear tempOutputDir
 rm -f $dockerImageOutputDir/*
 
-imageListFile=$1
+# Recieve array list 
+image_list=("$@")
 
 # Download and compress images
 echo -e "Initiating pulling and saving of docker images....\n"
 
-while read image; do
+for image in "${image_list[@]}"; do
     # check if images is downloaded aleady
-    image_name=$(echo $image | cut -d'/' -f 2)
-    e_image="$trackDir/$image_name.track"
+    image_name=$(echo $image | cut -d'/' -f 3)
+    safeName="${image_name//:/__}"
+    e_image="$trackDir/$safeName.track"
 
     retrieved=0
+    
     if [ -f $e_image ]; then
         # File exist
         echo -e "The image $image_name has been downloaded already\n"
@@ -55,16 +58,16 @@ while read image; do
         if [ $ec -eq 0 ]; then
 
             echo "Saving image $image_name"
-            docker save $image > "$dockerImageDir/$image_name.tar" &&
+            docker save $image > "$dockerImageDir/$safeName.tar" &&
 
             # Set permissions
-            chmod a+w "$dockerImageDir/$image_name.tar"
+            chmod a+w "$dockerImageDir/$safeName.tar"
 
             echo "Compressing image $image_name"
-            gzip "$dockerImageDir/$image_name.tar" &&
+            gzip "$dockerImageDir/$safeName.tar" &&
             
             # Set permissions
-            chmod a+w "$dockerImageDir/$image_name.tar.gz"
+            chmod a+w "$dockerImageDir/$safeName.tar.gz"
 
             # track completely downloaded image
             touch $e_image
@@ -86,9 +89,9 @@ while read image; do
     if [ $retrieved -eq 1 ]; then
         # Copy image file to dockerImageOutputDir
         echo "Marking it for download......"
-        cp -p $dockerImageDir/$image_name.tar.gz $dockerImageOutputDir/
+        cp -p $dockerImageDir/$safeName.tar.gz $dockerImageOutputDir/
 
     fi
-done < "$configsDir/$imageListFile"
+done
 
 echo "All images pulled, saved and compressed successfully..."

@@ -58,8 +58,9 @@ fi
 
 while read image; do
     # check if images is downloaded aleady
-    image_name=$(echo $image | cut -d'/' -f 2)
-    e_image="$trackDir/$releaseName"_"$versionNumber"_"$image_name.track"
+    image_name=$(echo $image | cut -d'/' -f 3)
+    safeName="${image_name//:/__}"
+    e_image="$trackDir/$releaseName"_"$versionNumber"_"$safeName.track"
 
     if [ -f $e_image ]; then
         # File exist
