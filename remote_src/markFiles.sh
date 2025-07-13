@@ -9,8 +9,11 @@ trackDir="$dir/track/docker"
 dockerImageDir="$imageDir/docker"
 output=$dir"/tempOutput"
 type=$1
-imageListFile=$2
+targetChartRef=$2
+versionNo=$3
 
+shift 3  # Remove first 3 args
+image_list=("$@")  # Capture the rest as image list
 
 if [ ! -d $output ]; then
     # Directory does not exist
@@ -26,28 +29,27 @@ if [[ $type = "3" || $type = "4" ]]; then
     
     echo -e "Initiating marking of images to be downloaded...\n"
 
-    while read image; do
+    for image in "${image_list[@]}"; do
         # check if images is downloaded aleady
-        image_name=$(echo $image | cut -d'/' -f 2)
+        image_name=$(echo $image | cut -d'/' -f 3)
+        safeName="${image_name//:/__}"
 
         if [ $type = "4" ]; then
             # specific  pulled Chart images 
-            chartName=$3
-            versionNo=$4
-            targetImage="$imageDir/$chartName/$versionNo/$image_name.tar.gz"
+            targetImage="$imageDir/$targetChartRef/$versionNo/$safeName.tar.gz"
         else
-            targetImage="$dockerImageDir/$image_name.tar.gz"
+            targetImage="$dockerImageDir/$safeName.tar.gz"
         fi
 
         # Check for target files and mark
         if [ -f $targetImage ]; then
             # File exist, copy to output directory
-            cp $targetImage $output/$image_name.tar.gz
+            cp $targetImage $output/$safeName.tar.gz
             echo -e "The image $image_name has been marked for download\n"   
         else
             echo -e "Error: The  $image_name image has not been pulled yet, kindly try downloading the image before attempting to download the pulled images\n"
         fi
 
-    done < "$configsDir/$imageListFile"
+    done
 
 fi

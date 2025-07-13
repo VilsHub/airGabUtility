@@ -3,11 +3,11 @@
 PS3="Please select the type of pulled images to be downloaded: "
 pullType=("All docker images" "All pulled chart images" "Specific pulled docker images" "Specific pulled chart images")
 selectedOpt=0
-releaseName=""
+targetChartRef=""
 
 select res in "${pullType[@]}"; do
-    selectedOpt=$REPLY
-    while [[ $REPLY != "1" && $REPLY != "2" && $REPLY != "3" && $REPLY != "4" ]]; do
+    selectedOpt=$(($REPLY))
+    while [[ $selectedOpt -lt 1 ||  $selectedOpt -gt 4 ]]; do
         PS3="Please select a valid option for the pulled images to be downloaded: "
         select res in "${pullType[@]}"; do
             selectedOpt=$REPLY
@@ -48,11 +48,11 @@ if [ $selectedOpt = "1" ]; then
 
 elif [ $selectedOpt = "2" ]; then
     # Download all pulled chart images
-    read -p "Enter the chartReference, example (zone/zonedependency): " chartRef
+    read -p "Enter the chartReference, i.e. (projectName/chartName): " chartRef
     read -p "Enter the version number for helm chart: " version_no
-    releaseName=${chartRef//\//-}
+    targetChartRef=${chartRef//\//-}
 
-    chartImageDir="$r_imageDir/$releaseName/$version_no"
+    chartImageDir="$r_imageDir/$targetChartRef/$version_no"
 
     echo "Initiating image download from the remote server to local server...."
     scp -P $prt $pk -r $server_username@$serverHost:$chartImageDir/* $l_imageDir
@@ -74,24 +74,24 @@ elif [ $selectedOpt = "3" ]; then
     fi
 elif [ $selectedOpt = "4" ]; then
     # Specific pulled chart images
-    read -p "Enter the chartReference, example (zone/zonedependency): " chartRef
+    read -p "Enter the chartReference, i.e. (projectName/chartName): " chartRef
     read -p "Enter the version number for helm chart: " version_no
-    releaseName=${chartRef//\//-}
-    read -p "Has the $releaseName chart version $version_no been downloaded before, with the temp files stil on the remote server? y/n: " downloaded
-
+    targetChartRef=${chartRef//\//-}
+    read -p "Has the chart '$targetChartRef' (version $version_no) already been downloaded, with temporary files still present on the remote server? y/n: " downloaded
+           
     if [[ $downloaded = "y" && $downloaded = "Y" ]]; then
         echo "Please kindly download the chart images first and try again"
         exit 2
     fi
 
     # Specific pulled docker images
-    read -p "Please specify the file which contains the names of the images to be downloaded: " image_list_file
+    read -p "Please specify the file which contains the names (in the format: hostname/repository/imageName:tag) of the images to be downloaded: " image_list_file
 
     # # Check if file exist
     if [ ! -f "$image_list_file" ]; then
         found=0
         while [ $found -eq 0 ]; do
-            read -p "The '$image_list_file' does not exist, please specify a valid text file which contains the names of the images to be downloaded: " image_list_file
+            read -p "The '$image_list_file' does not exist, please specify the file which contains the names of the images to be downloaded: " image_list_file
             if [ -f "$image_list_file" ]; then
                 found=1
             fi
@@ -103,12 +103,16 @@ fi
 if [[ $selectedOpt = "3" || $selectedOpt = "4" ]]; then
     
     # Set default value for option 4 if not selected
-    : ${releaseName:=""}
+    : ${targetChartRef:=""}
     : ${version_no:=""}
 
 
     echo "Initiating logging in to remote server, and marking of images for download..."
-    ssh -tp $prt $pk $server_username@$serverHost sudo "$r_configsDir/markFiles.sh" $selectedOpt $image_list_file $releaseName $version_no && 
+
+    # Convert image list to array
+    image_list=$(paste -sd ' ' "$image_list_file")
+
+    ssh -tp $prt $pk $server_username@$serverHost sudo "$r_configsDir/markFiles.sh" $selectedOpt $targetChartRef $version_no $image_list && 
     echo -e "Image marking completed successfully\n"
 
     echo "Initiating image download from the remote server to local server...."

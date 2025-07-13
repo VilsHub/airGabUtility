@@ -1,0 +1,6 @@
+v3.0.0
+	- Major code optimization done
+	- Added support for loading image into CRIO scope
+	- Added functionality to manage local repository (Needed for CRIO runtime)
+	- Added support for retrieving image list on local server if needed
+	- Added feature for tagging image from public registry to a private repository on remote host

@@ -49,7 +49,7 @@ if [ -n "$extractedImages" ]; then
 
         if [ $selectedOpt = "1" ]; then
             # Containerd
-            echo "Importing image: $imageName into containerd space"
+            echo "Importing image: $imageName into containerd scope...."
             ctr -n=k8s.io images import "$file"
 
         else
@@ -73,7 +73,7 @@ if [ -n "$extractedImages" ]; then
             echo -e "\nCopying image '$image_name:$tag' to local registry...."
             docker run --rm --network=host -v $file:"/tmp/${image_name}_$tag.tar" quay.io/skopeo/stable copy  --dest-tls-verify=false docker-archive:"/tmp/${image_name}_$tag.tar" docker://$r_alias/$image_name:$tag
             
-            echo -e "\nPulling image '$image_name:$tag' from registry to CRIO space...."
+            echo -e "\nPulling image '$image_name:$tag' from registry to CRIO scope...."
             crictl pull "$r_alias/$image_name:$tag"
         fi
 

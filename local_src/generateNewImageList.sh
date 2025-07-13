@@ -1,17 +1,17 @@
 #!/bin/bash
 echo -e "\nThis will help generate a new image list of non downloaded images from an existing images list"
-read -p "Please specify the existing image list file in the './configs' directory: " oldImageListFile
+read -p "Please specify the existing image list (in the format: hostname/repository/imageName:tag) file: " oldImageListFile
 
 # Local directories
 l_imageDir="./imgTemp"
 l_configsDir="./configs"
 
 #Check if file exist
-if [ ! -f "$l_configsDir/$oldImageListFile" ]; then
+if [ ! -f "$oldImageListFile" ]; then
     found=0
     while [ $found -eq 0 ]; do
-        read -p "The '$oldImageListFile' is not found in the  $l_configsDir directory, please specify the file name in the ./configs directory which contains the names of the images to be doownloaded: " oldImageListFile
-        if [ -f "$l_configsDir/$oldImageListFile" ]; then
+        read -p "The '$oldImageListFile' does not exist, please specify the target file which contains the names (in the format: hostname/repository/imageName:tag) of the images to be doownloaded: " oldImageListFile
+        if [ -f "$oldImageListFile" ]; then
             found=1
         fi
     done
@@ -21,9 +21,9 @@ read -p "Please specify the name of the new image list file: " newImageListFile
 
 #Check if file exist
 selectedOpt=0
-if [ -f "$l_configsDir/$newImageListFile" ]; then
+if [ -f "$newImageListFile" ]; then
     
-    PS3="Image list file exist in the directory ./config with the name '$newImageListFile', what would you like to do?: "
+    PS3="The image list file exist, what would you like to do?: "
     action=("Override" "Create new File")
 
     select res in "${action[@]}"; do
@@ -63,11 +63,11 @@ elif [ $selectedOpt = "2" ]; then
 fi
 
 count=0
-nImageList="$l_configsDir/$fileName"
+nImageList="$fileName"
 rm -f $nImageList
 while read image; do
     # check if images is downloaded aleady
-    image_name=$(echo $image | cut -d'/' -f 2)
+    image_name=$(echo $image | cut -d'/' -f 3)
     targetImageFile="$l_imageDir/$image_name.tar.gz"
     fullImageName="$l_imageDir/$image.tar.gz"
 
@@ -77,7 +77,7 @@ while read image; do
         ((count += 1 ))
     fi
 
-done < "$l_configsDir/$oldImageListFile"
+done < "$oldImageListFile"
 
 if [ $count -gt 0 ]; then
     echo "New image list file '$fileName' has been created with $count undownloaded images"

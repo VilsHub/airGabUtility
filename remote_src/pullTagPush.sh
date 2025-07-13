@@ -15,8 +15,6 @@ for image in "${image_list[@]}"; do
     safeName="${image_name//:/__}"
     e_image="$trackDir/$safeName.track"
 
-    # newTagSeg=$(echo $new_tag | cut -d'/' -f )
-
     if [ -f $e_image ]; then
         # File exist
         echo -e "The image $image_name has been downloaded already\n"
@@ -48,8 +46,20 @@ for image in "${image_list[@]}"; do
 
                 if [ $ec -eq 0 ];then
                     echo -e "Successfully pushed the image '$newName'\n"
+
+                    echo "Now Deleting '$image' and '$newName' from docker to save space...."
+                    docker rmi $image $newName 2> "$dir/error"
+                    ec=$?
+
+                    if [ $ec -eq 0 ]; then
+                        echo -e "Successfully deleted '$image' and '$newName' from docker space\n"
+                    else
+                        cho -e "The error below occured while deleting the images '$newName' and '$image':\n "
+                        cat "$dir/error"
+                        echo -e "\n"
+                    fi
                 else
-                    echo -e "The error below occured while pushin the image '$newName':\n "
+                    echo -e "The error below occured while pushing the image '$newName':\n "
                     cat "$dir/error"
                     echo -e "\n"
                 fi

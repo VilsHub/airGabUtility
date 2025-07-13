@@ -1,7 +1,7 @@
 #!/bin/bash
 # Get the download type
 PS3="Please select the type of images to be downloaded: "
-downloadType=("Docker images" "Chart images")
+downloadType=("Docker images from file" "Docker images from helm Chart")
 selectedOpt=0
 
 select res in "${downloadType[@]}"; do
@@ -48,9 +48,9 @@ if [ $selectedOpt = "1" ]; then
     fi
 else
     # Download chart images
-    read -p "Enter the chartReference, example (zone/zonedependency): " chartRef
+    read -p "Enter the chartReference, i.e. (projectName/chartName): " chartRef
     read -p "Enter the version number for helm chart: " version_no
-    releaseName=${chartRef//\//-}
+    targetChartRef=${chartRef//\//-}
 
 fi
 
@@ -71,9 +71,9 @@ if [ $selectedOpt = "1"  ]; then
 
     ssh -tp $prt $pk $server_username@$serverHost sudo "$r_configsDir/directImageDownload.sh" $image_list && done=1
 else
-    chartImageDir="$r_imageDir/$releaseName/$version_no"
+    chartImageDir="$r_imageDir/$targetChartRef/$version_no"
     # Chart images download
-    ssh -tp $prt $pk $server_username@$serverHost sudo "$r_configsDir/downloadAndCompressImages.sh" $releaseName $version_no $chartRef && done=1
+    ssh -tp $prt $pk $server_username@$serverHost sudo "$r_configsDir/downloadAndCompressImages.sh" $targetChartRef $version_no $chartRef && done=1
 fi
 
 if [ $done -eq 1 ]; then

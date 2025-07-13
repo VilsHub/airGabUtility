@@ -5,17 +5,17 @@ dir="/tmp/airGapTempFiles"
 configsDir="$dir/configs"
 imageDir="$dir/images"
 
-releaseName=$1
+targetChartRef=$1
 chartReference=$3
 versionNumber=$2
 
 trackDir="$dir/track"
-chartImageDir="$imageDir/$releaseName/$versionNumber"
+chartImageDir="$imageDir/$targetChartRef/$versionNumber"
 
 if [ ! -d $chartImageDir ]; then
     # Directory does not exist
     mkdir -p $chartImageDir
-    chmod a+wr $imageDir/$releaseName $imageDir/$releaseName/$versionNumber
+    chmod a+wr $imageDir/$targetChartRef $imageDir/$targetChartRef/$versionNumber
 fi
 
 if [ ! -d $trackDir ]; then
@@ -24,11 +24,11 @@ if [ ! -d $trackDir ]; then
     chmod a+wr $trackDir
 fi
 
-# Example releaseName=zone_dependendency, chartReference=zone/zone
+# Example chartReference=zone/zone
 
 echo "Updating helm repo and installing zone..."
 helm repo update
-helm template $releaseName $chartReference --version $versionNumber > "$dir/zone-values.txt" 
+helm template $targetChartRef $chartReference --version $versionNumber > "$dir/zone-values.txt" 
 
 # Set permissions
 chmod a+w "$dir/zone-values.txt"
@@ -44,7 +44,7 @@ mv $dir/zone-values-extract-unix.txt $dir/zone-values-extract.txt
 chmod a+w "$dir/zone-values-extract.txt"
 
 # Store image list for reference
-cp -p "$dir/zone-values-extract.txt" $chartImageDir/$releaseName"_"$versionNumber"_image_list.txt"
+cp -p "$dir/zone-values-extract.txt" $chartImageDir/$targetChartRef"_"$versionNumber"_image_list.txt"
 
 # Download and compress images
 echo -e "Initiating pulling and saving of docker images....\n"
@@ -60,7 +60,7 @@ while read image; do
     # check if images is downloaded aleady
     image_name=$(echo $image | cut -d'/' -f 3)
     safeName="${image_name//:/__}"
-    e_image="$trackDir/$releaseName"_"$versionNumber"_"$safeName.track"
+    e_image="$trackDir/$targetChartRef"_"$versionNumber"_"$safeName.track"
 
     if [ -f $e_image ]; then
         # File exist
@@ -72,16 +72,16 @@ while read image; do
 
         if [ $ec -eq 0 ]; then
             echo "Saving image $image_name"
-            docker save $image > "$chartImageDir/$image_name.tar" &&
+            docker save $image > "$chartImageDir/$safeName.tar" &&
 
             # Set permissions
-            chmod a+w "$chartImageDir/$image_name.tar"
+            chmod a+w "$chartImageDir/$safeName.tar"
 
             echo "Compressing image $image_name"
-            gzip "$chartImageDir/$image_name.tar" &&
+            gzip "$chartImageDir/$safeName.tar" &&
             
             # Set permissions
-            chmod a+w "$chartImageDir/$image_name.tar.gz"
+            chmod a+w "$chartImageDir/$safeName.tar.gz"
 
             # track completely downloaded image
             touch $e_image
