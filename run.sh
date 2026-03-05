@@ -6,7 +6,7 @@ selectedOpt=0
 
 select res in "${taskType[@]}"; do
     selectedOpt=$(($REPLY))
-    while [[ $selectedOpt -lt 1 ||  $selectedOpt -gt 9 ]]; do
+    while [[ $selectedOpt -lt 1 ||  $selectedOpt -gt 10 ]]; do
         echo -e "\n"
         PS3="Please select a valid option for the task type: "
         select res in "${taskType[@]}"; do
