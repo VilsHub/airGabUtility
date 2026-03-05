@@ -1,0 +1,37 @@
+#!/bin/bassh
+function showProgress(){
+    beginMsg=$1
+
+    # Hide cursor
+    tput civis
+    trap 'tput cnorm; exit' INT TERM EXIT
+
+    (
+    while true; do
+        for dots in "" "." ".." "..." "...." "....."; do
+            printf "\r%s%s\033[K" "$beginMsg" "$dots"
+            sleep 0.4
+        done
+    done
+    ) &
+    local spinner_pid=$!
+
+    # store pid
+    echo $spinner_pid > /tmp/xpid 
+    
+}
+function endProgress(){
+    endMsg=$1
+    processState=$2 #can be either 'f' for failed or 's' for successful
+    pid=$(cat /tmp/xpid 2>/dev/null)
+    
+    # Stop animation
+    kill "$pid" 2>/dev/null
+    wait "$pid" 2>/dev/null
+
+    # Restore cursor
+    tput cnorm
+    status=$( [ $processState == "f" ] && echo "completed but unsuccessful ❌"  || echo "done ✅" )
+    printf "\r%s..... %s\n" "$endMsg" "$status"
+    echo ""
+}
