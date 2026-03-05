@@ -1,7 +1,7 @@
 #!/bin/bash
 # Get the download type
 PS3="Please select your desired task: "
-taskType=("Initialize script" "Download Images" "Get pulled Images" "Extract and import images" "Get chart image list" "Generate new image list" "Uninstall script" "Manage local registry for CRIO" "Pull, Tag and Push Images")
+taskType=("Initialize script" "Download Images" "Get pulled Images" "Extract and import images" "Get chart image list" "Generate new image list" "Uninstall script" "Manage local registry for CRIO" "Pull, Tag and Push Images" "Group prune images")
 selectedOpt=0
 
 select res in "${taskType[@]}"; do
@@ -38,4 +38,6 @@ elif [ $selectedOpt = "8" ]; then
     . ./local_src/manageLocalRegistry.sh
 elif [ $selectedOpt = "9" ]; then
     . ./local_src/pullTagPushImages.sh
+elif [ $selectedOpt = "10" ]; then
+    . ./local_src/groupPruneImages.sh
 fi
